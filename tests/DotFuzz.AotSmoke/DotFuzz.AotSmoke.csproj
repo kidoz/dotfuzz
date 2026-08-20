@@ -4,6 +4,9 @@
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
     <StripSymbols>true</StripSymbols>
+    <!-- PublishAot restores against the host runtime identifier, so a committed
+         lock file can never match every CI operating system. -->
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/DotFuzz/DotFuzz.csproj" />
