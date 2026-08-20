@@ -1,0 +1,52 @@
+name: NativeAOT
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  # Reusable entry point so release.yml can gate publishing on this matrix.
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Scope the group by event so a release-triggered (workflow_call) run never shares a
+# group with pull_request/push runs, and only those fast-feedback runs are cancellable.
+concurrency:
+  group: aot-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+
+      - name: Publish and run NativeAOT smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          rid=$(dotnet --info | awk '/RID:/ { print $2 }')
+          dotnet publish tests/DotFuzz.AotSmoke/DotFuzz.AotSmoke.csproj \
+            --configuration Release -r "$rid" --self-contained
+          "tests/DotFuzz.AotSmoke/bin/Release/net10.0/$rid/publish/DotFuzz.AotSmoke"
+          echo "NativeAOT smoke passed on $rid"
