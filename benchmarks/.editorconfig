@@ -1,0 +1,3 @@
+[*.cs]
+# BenchmarkDotNet requires benchmark classes and their members to be public.
+dotnet_diagnostic.CA1515.severity = none

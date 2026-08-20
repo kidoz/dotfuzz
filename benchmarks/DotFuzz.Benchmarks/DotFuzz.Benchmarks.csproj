@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/DotFuzz/DotFuzz.csproj" />
+    <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="FuzzySharp" />
+    <PackageReference Include="Raffinert.FuzzySharp" />
+  </ItemGroup>
+</Project>

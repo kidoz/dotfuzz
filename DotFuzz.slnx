@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DotFuzz/DotFuzz.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DotFuzz.Tests/DotFuzz.Tests.csproj" />
+    <Project Path="tests/DotFuzz.AotSmoke/DotFuzz.AotSmoke.csproj" />
+  </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/DotFuzz.Benchmarks/DotFuzz.Benchmarks.csproj" />
+  </Folder>
+</Solution>

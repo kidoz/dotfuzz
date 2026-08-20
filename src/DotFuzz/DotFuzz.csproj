@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>DotFuzz</AssemblyName>
+    <RootNamespace>DotFuzz</RootNamespace>
+    <Description>A span-first, NativeAOT-friendly fuzzy matching engine for .NET 10.</Description>
+    <Authors>Aleksandr Pavlov</Authors>
+    <Copyright>Copyright (c) 2026 Aleksandr Pavlov</Copyright>
+    <PackageProjectUrl>https://github.com/kidoz/dotfuzz</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kidoz/dotfuzz</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <VersionPrefix>0.2.0</VersionPrefix>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>fuzzy;matching;indel;span;nativeaot;performance</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

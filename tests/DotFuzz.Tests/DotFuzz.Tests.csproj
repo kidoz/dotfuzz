@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/DotFuzz/DotFuzz.csproj" />
+    <PackageReference Include="FuzzySharp" />
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+</Project>

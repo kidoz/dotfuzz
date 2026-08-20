@@ -1,0 +1,3 @@
+[*.cs]
+# Tests use seeded System.Random for deterministic data generation, not security.
+dotnet_diagnostic.CA5394.severity = none
