@@ -50,8 +50,8 @@ public class ExtractOneBenchmarks
     [Benchmark(Baseline = true, Description = "FuzzySharp 2.0.2 Ratio loop")]
     public int FuzzySharp202Loop() => ExtractWithOriginal(_query, _choices);
 
-    [Benchmark(Description = "Raffinert 5.0.3 cached Ratio loop")]
-    public int Raffinert503CachedLoop() => ExtractWithRaffinert(_raffinertCached, _choices);
+    [Benchmark(Description = "Raffinert 6.0.1 cached Ratio loop")]
+    public double Raffinert601CachedLoop() => ExtractWithRaffinert(_raffinertCached, _choices);
 
     [Benchmark(Description = "DotFuzz cached ExtractOne")]
     public int DotFuzzCachedExtractOne() => Process.ExtractOne(_cached, _choices).Score;
@@ -67,9 +67,9 @@ public class ExtractOneBenchmarks
         return best;
     }
 
-    private static int ExtractWithRaffinert(RaffinertCachedRatio scorer, string[] choices)
+    private static double ExtractWithRaffinert(RaffinertCachedRatio scorer, string[] choices)
     {
-        var best = 0;
+        var best = 0.0;
         foreach (var choice in choices)
         {
             best = Math.Max(best, scorer.Score(choice));

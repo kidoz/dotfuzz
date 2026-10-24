@@ -19,8 +19,8 @@ public class PairwiseRatioBenchmarks
     [Benchmark(Baseline = true, Description = "FuzzySharp 2.0.2")]
     public int FuzzySharp202() => OriginalFuzz.Ratio(_left, _right);
 
-    [Benchmark(Description = "Raffinert 5.0.3")]
-    public int Raffinert503() => RaffinertFuzz.Ratio(_left, _right);
+    [Benchmark(Description = "Raffinert 6.0.1")]
+    public double Raffinert601() => RaffinertFuzz.Ratio(_left, _right);
 
     [Benchmark]
     public int DotFuzz() => Fuzz.Ratio(_left.AsSpan(), _right.AsSpan());

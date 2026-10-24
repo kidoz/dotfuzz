@@ -37,8 +37,8 @@ public class CachedRatioBenchmarks
     [Benchmark(Baseline = true, Description = "FuzzySharp 2.0.2 (no query cache)")]
     public int FuzzySharp202() => OriginalFuzz.Ratio(_left, _right);
 
-    [Benchmark(Description = "Raffinert 5.0.3 CachedDefaultRatioScorer")]
-    public int Raffinert503Cached() => _raffinertCached.Score(_right);
+    [Benchmark(Description = "Raffinert 6.0.1 CachedDefaultRatioScorer")]
+    public double Raffinert601Cached() => _raffinertCached.Score(_right);
 
     [Benchmark(Description = "DotFuzz CachedRatio")]
     public int DotFuzzCached() => _cached.Score(_right.AsSpan());

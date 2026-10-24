@@ -25,8 +25,8 @@ public class CutoffRatioBenchmarks
     [GlobalSetup]
     public void Setup() => (_left, _right) = ScenarioFactory.Create(Scenario);
 
-    [Benchmark(Baseline = true, Description = "Raffinert 5.0.3 (no public cutoff)")]
-    public int RaffinertWithoutPublicCutoff() => RaffinertFuzz.Ratio(_left, _right);
+    [Benchmark(Baseline = true, Description = "Raffinert 6.0.1 (no public cutoff)")]
+    public double RaffinertWithoutPublicCutoff() => RaffinertFuzz.Ratio(_left, _right);
 
     [Benchmark(Description = "DotFuzz (cutoff)")]
     public int DotFuzzWithCutoff() => Fuzz.Ratio(_left.AsSpan(), _right.AsSpan(), ScoreCutoff);

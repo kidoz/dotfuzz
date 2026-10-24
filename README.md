@@ -19,7 +19,7 @@
   `ReadOnlySpan<string>`;
 - differential tests against FuzzySharp 2.0.2;
 - BenchmarkDotNet comparisons with FuzzySharp 2.0.2 and
-  Raffinert.FuzzySharp 5.0.3;
+  Raffinert.FuzzySharp 6.0.1;
 - a NativeAOT publish smoke test.
 
 DotFuzz keeps score meaning compatible with FuzzySharp while staying span-first
