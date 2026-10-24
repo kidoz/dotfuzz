@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-25
+
 ### Changed
 
 - Partial alignment now rejects matrices above 1,048,576 cells after common
@@ -45,5 +47,6 @@ and this project adheres to
 - Trim- and NativeAOT-compatible, deterministic packaging with SourceLink and
   symbol packages.
 
-[Unreleased]: https://github.com/kidoz/dotfuzz/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/kidoz/dotfuzz/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/kidoz/dotfuzz/releases/tag/v1.0.1
 [1.0.0]: https://github.com/kidoz/dotfuzz/releases/tag/v1.0.0
