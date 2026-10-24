@@ -72,7 +72,7 @@ a cutoff, it returns `cutoff + 1` as a sentinel when the exact result is larger.
 ## Build and verify
 
 ```text
-dotnet restore DotFuzz.slnx
+dotnet restore DotFuzz.slnx --locked-mode
 dotnet build DotFuzz.slnx -c Release --no-restore
 dotnet test DotFuzz.slnx -c Release --no-restore
 dotnet publish tests/DotFuzz.AotSmoke/DotFuzz.AotSmoke.csproj \
@@ -84,7 +84,7 @@ local tool:
 
 ```text
 dotnet tool restore
-dotnet csharpier format .
+dotnet csharpier format src tests benchmarks
 ```
 
 Run every benchmark or select one suite:

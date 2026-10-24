@@ -5,15 +5,15 @@ default:
 # Restore local dotnet tools and NuGet packages
 restore:
     dotnet tool restore
-    dotnet restore DotFuzz.slnx
+    dotnet restore DotFuzz.slnx --locked-mode
 
 # Format all C# sources with CSharpier
 format:
-    dotnet csharpier format .
+    dotnet csharpier format src tests benchmarks
 
 # Verify formatting without changing files (CI-friendly)
 format-check:
-    dotnet csharpier check .
+    dotnet csharpier check src tests benchmarks
 
 # Build the full solution
 build:

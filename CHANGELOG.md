@@ -20,6 +20,8 @@ and this project adheres to
 - Reject overflowing combined distance lengths and token workspace sizes, check
   edit-operation buffer sizing, and widen mask-size calculations before fallback.
 - Align documented compatibility corpus counts with committed tests.
+- Ignore the repository-local package cache and scope formatting commands to
+  `src`, `tests`, and `benchmarks`; document locked restore consistently.
 
 ## [1.0.0] - 2026-08-20
 
