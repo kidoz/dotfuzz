@@ -95,10 +95,16 @@ differences above. It does not provide source compatibility with FuzzySharp:
 
 ## Resource limits
 
-Partial alignment uses a Levenshtein matrix. After common prefix and suffix
-trimming, `(shorterLength + 1) * (longerLength + 1)` must not exceed 1,048,576
-cells (4 MiB of `int` storage). Requests above this limit throw
-`ArgumentOutOfRangeException` before renting a matrix. Edit-operation buffers
+Partial alignment uses a Levenshtein matrix when both trimmed middles are
+non-empty. If either side becomes empty after common prefix and suffix trimming,
+only the two boundary windows need scoring; no matrix is allocated. An exact
+prefix or suffix therefore scores 100 even with a long unmatched tail. A split
+prefix/suffix around an internal insertion can score less than 100.
+
+When a matrix is needed, `(shorterLength + 1) * (longerLength + 1)` for the trimmed
+middles must not exceed 1,048,576 cells (4 MiB of `int` storage). Requests above this limit throw
+`ArgumentOutOfRangeException` before renting a matrix. The exception has no
+parameter name because the limit applies to the input pair. Edit-operation buffers
 are additional workspace, and their size arithmetic is checked.
 
 This limit also applies when `PartialTokenSortRatio`, `PartialTokenSetRatio`,

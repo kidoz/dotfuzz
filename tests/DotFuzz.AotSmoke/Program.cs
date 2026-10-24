@@ -27,6 +27,7 @@ return
     && top.Length == 2
     && all.Length == 3
     && RejectsOversizedPartialAlignment()
+    && ScoresLongAffixesWithoutMatrix()
     ? 0
     : 1;
 
@@ -37,8 +38,17 @@ static bool RejectsOversizedPartialAlignment()
         _ = Fuzz.PartialRatio(new string('a', 1_024), new string('b', 1_024));
         return false;
     }
-    catch (ArgumentOutOfRangeException)
+    catch (ArgumentOutOfRangeException exception)
     {
-        return true;
+        return exception.ParamName is null;
     }
+}
+
+static bool ScoresLongAffixesWithoutMatrix()
+{
+    const string query = "hello";
+    var tail = new string('x', 1_048_576);
+    return Fuzz.PartialRatio(query, query + tail) == 100
+        && Fuzz.PartialRatio(tail + query, query) == 100
+        && Fuzz.WeightedRatio(query, query + tail) == 60;
 }

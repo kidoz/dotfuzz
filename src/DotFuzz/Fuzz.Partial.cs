@@ -16,7 +16,9 @@ public static partial class Fuzz
     /// units. An empty input returns zero. Alignment discovery uses working memory
     /// proportional to the product of the input lengths; ordinary short inputs stay
     /// on the stack and larger inputs use pooled buffers. After common affix
-    /// trimming, the alignment matrix is limited to 1,048,576 cells.
+    /// trimming, the alignment matrix is limited to 1,048,576 cells. If either
+    /// trimmed side is empty, only the boundary windows are scored and no matrix
+    /// is needed.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">
     /// The alignment matrix would exceed 1,048,576 cells after common affix trimming.

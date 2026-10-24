@@ -56,13 +56,30 @@ internal static class PartialRatioCore
         middleShorter = middleShorter[..^suffixLength];
         middleLonger = middleLonger[..^suffixLength];
 
+        if (middleShorter.IsEmpty || middleLonger.IsEmpty)
+        {
+            // A single insertion needs only the prefix/suffix matching-block
+            // windows. Split affixes around an internal insertion need not score 100.
+            var prefixScore = Fuzz.Ratio(shorter, longer[..shorter.Length], scoreCutoff);
+            return prefixScore == 100
+                ? 100
+                : Math.Max(
+                    prefixScore,
+                    Fuzz.Ratio(
+                        shorter,
+                        longer[^shorter.Length..],
+                        Math.Max(scoreCutoff, prefixScore + 1)
+                    )
+                );
+        }
+
         // Widen before adding or multiplying, and reject before renting workspace.
         var cellCount = ((long)middleShorter.Length + 1) * ((long)middleLonger.Length + 1);
         if (cellCount > MaximumMatrixCells)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(right),
-                "Partial alignment requires more than 1,048,576 matrix cells after common affix trimming."
+                paramName: null,
+                message: "Partial alignment requires more than 1,048,576 matrix cells after common affix trimming."
             );
         }
 

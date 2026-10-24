@@ -16,6 +16,9 @@ and this project adheres to
 
 ### Fixed
 
+- Skip partial-alignment matrices when affix trimming empties either side,
+  preserving exact prefix/suffix matches with long unmatched tails and scores
+  for internal insertions. Matrix-limit exceptions no longer blame one parameter.
 - Clear pooled preprocessing, token-join, and character-key buffers on return.
 - Reject overflowing combined distance lengths and token workspace sizes, check
   edit-operation buffer sizing, and widen mask-size calculations before fallback.

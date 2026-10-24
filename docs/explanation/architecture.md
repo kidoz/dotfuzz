@@ -103,6 +103,9 @@ of the trimmed input lengths, matching the reference algorithm. A ceiling of
 1,048,576 matrix cells bounds this work before a pool rental. Larger alignments
 throw rather than turning an unsupported request into a zero score. Checking
 after affix trimming preserves long comparisons whose differing middles are small.
+If trimming empties either side, scoring the prefix and suffix windows replaces
+matrix construction entirely. Exact prefixes and suffixes score 100, while an
+insertion between shared affixes can still lower the score.
 The exact bound is part of the [resource contract](../reference/compatibility.md#resource-limits).
 
 ## Token scorers
