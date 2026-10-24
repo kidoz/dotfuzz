@@ -1,5 +1,12 @@
 # Architecture
 
+[Documentation](../README.md) / Explanation
+
+This page explains why DotFuzz uses a span-first Indel engine, explicit
+preprocessing, and reusable query state. For public signatures and behavior,
+see the [API reference](../reference/api.md) and
+[compatibility contract](../reference/compatibility.md).
+
 ## Design goals
 
 The core engine validates four claims that the wider scorer surface builds on:
@@ -140,8 +147,9 @@ for the ordinary input sizes exercised by the tests and benchmarks.
 Once the buffer is full, the scan cutoff rises to one above the current
 worst kept score, so ties keep the earliest choice and the scan exits early
 when the buffer is saturated at 100. The span-destination overload uses the
-destination length as the limit and allocates nothing; the array overloads
-allocate only the returned results. `Process.ExtractAll` scores every choice
+destination length as the limit and allocates nothing for ordinary input sizes;
+the array overloads allocate result arrays and may copy to a smaller array.
+`Process.ExtractAll` scores every choice
 against the fixed cutoff and preserves choice order.
 
 ## NativeAOT posture

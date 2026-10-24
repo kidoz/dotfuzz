@@ -1,5 +1,10 @@
 # Compatibility contract
 
+[Documentation](../README.md) / Reference
+
+The compatibility oracle is FuzzySharp 2.0.2. This contract covers the implemented
+scorers; [API reference](api.md) describes their signatures and result types.
+
 ## Ratio semantics
 
 For non-empty inputs, DotFuzz computes:
@@ -59,8 +64,8 @@ mismatch; direct `Ratio` sweeps have surfaced none.
 
 ## API differences
 
-DotFuzz is source-compatible in score meaning, not API-compatible with
-the entire FuzzySharp package:
+DotFuzz targets compatible scores for the implemented scorers, subject to the
+differences above. It does not provide source compatibility with FuzzySharp:
 
 - `ReadOnlySpan<char>` is the primary API; strings are convenience overloads.
 - Preprocessing is always explicit through `Preprocess`; there is no

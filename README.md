@@ -106,14 +106,22 @@ src/DotFuzz/                   shipping library
 tests/DotFuzz.Tests/           golden, differential, property, allocation tests
 tests/DotFuzz.AotSmoke/        NativeAOT console smoke test
 benchmarks/DotFuzz.Benchmarks/ BenchmarkDotNet comparison suites
-docs/                          architecture, compatibility, methodology, findings
+docs/                          tutorials, how-to guides, reference, explanation
 ```
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md) — design contract and engine internals
-- [Compatibility](docs/COMPATIBILITY.md) — FuzzySharp behavioral compatibility
-- [Benchmarks](docs/BENCHMARKS.md) — methodology and measured results
+Start at the [documentation index](docs/README.md), organized using
+[Diátaxis](https://diataxis.fr/):
+
+- **Tutorial:** [Find your first fuzzy match](docs/tutorials/first-match.md)
+- **How-to guides:** [Match and rank choices](docs/how-to/match-and-rank.md),
+  [build and verify](docs/how-to/build-and-verify.md),
+  [run benchmarks](docs/how-to/run-benchmarks.md)
+- **Reference:** [API](docs/reference/api.md),
+  [compatibility](docs/reference/compatibility.md),
+  [benchmark results](docs/reference/benchmark-results.md)
+- **Explanation:** [Architecture](docs/explanation/architecture.md)
 
 ## License
 

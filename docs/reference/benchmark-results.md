@@ -1,4 +1,11 @@
-# Benchmark methodology and findings
+# Benchmark results
+
+[Documentation](../README.md) / Reference
+
+These are the measurements previously recorded in this repository, retained with
+their original environment and date. They have not been rerun for the documentation
+reorganization. See [Run benchmarks](../how-to/run-benchmarks.md) for reproduction
+commands.
 
 ## Environment
 
@@ -15,7 +22,8 @@ Measurements were taken on 2026-08-20 with:
   central package management.
 
 The raw CSV, JSON, HTML, and Markdown reports are generated in
-`BenchmarkDotNet.Artifacts/results/` by the commands below.
+`BenchmarkDotNet.Artifacts/results/` by the benchmark harness. These generated
+artifacts are not included in this documentation.
 
 ## Inputs and fairness
 
@@ -97,33 +105,19 @@ On dissimilar inputs with cutoff 85, DotFuzz returned zero and allocated
 0 B. Relative to Raffinert's public no-cutoff call it was 3.0x/9.2x faster for
 short ASCII/Unicode, 2.2x/3.7x for medium, and 4.0x/4.8x for long inputs.
 
-## Conclusions
+## Interpretation limits
 
-The results validate the central architecture: direct scoring is
-allocation-free in the measured range, exact compatibility is maintained in the
-test corpus, cached lookup is competitive across every size, rising cutoffs make
-extraction faster, and the advantage over the original implementation grows
-substantially with input length. The `ShortRun` job is suitable for
-direction-setting, not a release-grade performance guarantee; repeat the default
-job on target production hardware before setting service-level targets.
+Allocation figures apply to the measured inputs and exclude cached scorer
+construction. These suites cover direct `Ratio`, cached `Ratio`, `ExtractOne`,
+and cutoff scoring; they do not establish performance for partial, token, or
+weighted scorers, preprocessing, or every extraction overload. Correctness is
+covered separately by the [compatibility contract](compatibility.md).
+
+The `ShortRun` job is suitable for direction-setting, not a release-grade
+performance guarantee. Use the default job on target production hardware before
+setting performance targets.
 
 ## Reproduce
 
-```text
-dotnet run -c Release \
-  --project benchmarks/DotFuzz.Benchmarks/DotFuzz.Benchmarks.csproj \
-  -- --filter '*PairwiseRatioBenchmarks*' --job short --exporters json
-
-dotnet run -c Release \
-  --project benchmarks/DotFuzz.Benchmarks/DotFuzz.Benchmarks.csproj \
-  -- --filter '*CachedRatioBenchmarks*' --job short --exporters json
-
-dotnet run -c Release \
-  --project benchmarks/DotFuzz.Benchmarks/DotFuzz.Benchmarks.csproj \
-  -- --filter '*ExtractOneBenchmarks*' --job short --exporters json
-
-dotnet run -c Release \
-  --project benchmarks/DotFuzz.Benchmarks/DotFuzz.Benchmarks.csproj \
-  -- --filter '*CutoffRatioBenchmarks*' --job short --exporters json
-```
-
+Follow [Run benchmarks](../how-to/run-benchmarks.md). Select each of the four
+suites with the `short` job to reproduce the recorded job configuration.
