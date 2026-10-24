@@ -126,7 +126,7 @@ public static class Preprocess
         }
         finally
         {
-            ArrayPool<char>.Shared.Return(rented);
+            ArrayPool<char>.Shared.Return(rented, clearArray: true);
         }
     }
 

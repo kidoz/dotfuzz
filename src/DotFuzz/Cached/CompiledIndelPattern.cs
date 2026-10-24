@@ -46,11 +46,13 @@ internal sealed class CompiledIndelPattern
         }
 
         var blockCount = (pattern.Length + 63) >>> 6;
-        var maskWordCount = checked(uniqueCount * blockCount);
-        if (maskWordCount > MaximumBitMaskWords)
+        var requiredMaskWords = (long)uniqueCount * blockCount;
+        if (requiredMaskWords > MaximumBitMaskWords)
         {
             return;
         }
+
+        var maskWordCount = (int)requiredMaskWords;
 
         var lookupCapacity = HashCapacity(uniqueCount);
         _lookupKeys = new int[lookupCapacity];

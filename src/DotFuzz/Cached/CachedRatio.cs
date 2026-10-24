@@ -27,6 +27,7 @@ public sealed class CachedRatio
     public int QueryLength => _pattern.Length;
 
     /// <inheritdoc cref="Fuzz.Ratio(ReadOnlySpan{char}, ReadOnlySpan{char}, int)"/>
+    /// <exception cref="OverflowException">The combined query and candidate length exceeds <see cref="int.MaxValue"/>.</exception>
     public int Score(ReadOnlySpan<char> candidate, int scoreCutoff = 0)
     {
         if (_pattern.Length == 0 || candidate.IsEmpty || scoreCutoff > 100)
@@ -34,7 +35,7 @@ public sealed class CachedRatio
             return 0;
         }
 
-        var totalLength = checked(_pattern.Length + candidate.Length);
+        var totalLength = ScoreMath.TotalLength(_pattern.Length, candidate.Length);
         var maximumDistance = ScoreMath.MaximumDistanceForScore(totalLength, scoreCutoff);
         if (maximumDistance < 0)
         {

@@ -99,7 +99,11 @@ Each window is then scored with the ordinary bit-parallel Indel engine, with
 the running best score converted to a distance bound that prunes hopeless
 windows. The cost matrix and edit-op storage live on the stack for short
 inputs and in pooled buffers otherwise; working memory grows with the product
-of the input lengths, matching the reference algorithm.
+of the trimmed input lengths, matching the reference algorithm. A ceiling of
+1,048,576 matrix cells bounds this work before a pool rental. Larger alignments
+throw rather than turning an unsupported request into a zero score. Checking
+after affix trimming preserves long comparisons whose differing middles are small.
+The exact bound is part of the [resource contract](../reference/compatibility.md#resource-limits).
 
 ## Token scorers
 
@@ -171,8 +175,13 @@ the shipping library.
 - There is no FuzzySharp API facade; extraction scans `ReadOnlySpan<string>`
   with direct `Ratio`, not `IEnumerable<T>` with extractor delegates.
 - `PartialRatio` alignment discovery uses working memory proportional to the
-  product of the input lengths, like the reference implementation.
+  product of the trimmed input lengths, capped at 1,048,576 matrix cells; larger
+  alignment requests throw `ArgumentOutOfRangeException`.
 - Very large inputs may rent from `ArrayPool<T>`; "zero allocation" describes
   the measured ordinary hot paths after scorer construction, not an unconditional
   promise for every possible span length.
+- Combined distance/ratio input lengths and token workspace sizes must fit in an
+  `int`; checked arithmetic rejects unsupported sizes before they can wrap.
+- Pooled text and character-key buffers are cleared on return. Clearing adds
+  work to pooled paths and does not erase owned strings or cached patterns.
 

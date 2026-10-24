@@ -34,16 +34,21 @@ The following behaviors are explicit:
 One divergence class is known and deliberate: when the exact score is a `.5`
 midpoint, FuzzySharp rounds a `double` quotient whose representation error can
 land one step away from the true midpoint, while DotFuzz's integer arithmetic
-applies exact ties-to-even (always the even neighbor). Differential sweeps of
-40,000 token-scorer pairs surfaced three such one-off differences and no other
-mismatch; direct `Ratio` sweeps have surfaced none.
+applies exact ties-to-even (always the even neighbor). The committed
+[token compatibility tests](../../tests/DotFuzz.Tests/TokenRatioCompatibilityTests.cs)
+cover 1,500 generated pairs across four scorers (6,000 comparisons) and 1,000
+preprocessed pairs across two scorers (2,000 comparisons). The preprocessed
+comparisons permit a one-point difference only when DotFuzz's score is even.
+The [direct `Ratio` corpus](../../tests/DotFuzz.Tests/RatioCompatibilityTests.cs)
+requires exact equality.
 
 ## Partial, token, and weighted scorers
 
 - `PartialRatio` ports FuzzySharp 2.0.2's algorithm: candidate windows come
   from the same Levenshtein edit-op matching blocks, including the reference
-  backtrace tie-breaking. A 20,000-pair differential sweep found no
-  differences.
+  backtrace tie-breaking. Its committed
+  [differential corpus](../../tests/DotFuzz.Tests/PartialRatioCompatibilityTests.cs)
+  checks 2,000 generated pairs for exact equality, in addition to golden cases.
 - `TokenSortRatio`, `PartialTokenSortRatio`, `TokenSetRatio`, and
   `PartialTokenSetRatio` follow FuzzySharp's constructions (sorted joins;
   intersection and remainder combinations over unique tokens) with whitespace
@@ -87,6 +92,31 @@ differences above. It does not provide source compatibility with FuzzySharp:
 - Cached scorer construction from `ReadOnlySpan<char>` copies the query because
   the cached object must own stable data. Construction from `string` retains that
   string.
+
+## Resource limits
+
+Partial alignment uses a Levenshtein matrix. After common prefix and suffix
+trimming, `(shorterLength + 1) * (longerLength + 1)` must not exceed 1,048,576
+cells (4 MiB of `int` storage). Requests above this limit throw
+`ArgumentOutOfRangeException` before renting a matrix. Edit-operation buffers
+are additional workspace, and their size arithmetic is checked.
+
+This limit also applies when `PartialTokenSortRatio`, `PartialTokenSetRatio`,
+or the partial branch of `WeightedRatio` invokes partial alignment. For token
+scorers, it applies to each transformed pair actually scored. Equal inputs,
+common affixes, empty-input returns, and cutoffs above 100 can avoid matrix work.
+With no common affixes, two 1,023-code-unit inputs fit exactly; two 1,024-code-unit
+inputs exceed the limit. Long inputs with small differing middles can still fit.
+This is a deliberate resource bound beyond FuzzySharp's scoring contract.
+
+Distance and ratio calculations require combined lengths representable by an
+`int`; checked arithmetic throws `OverflowException` when that sum exceeds
+`int.MaxValue`. Token workspace sizes are also checked. These limits are separate
+from score cutoffs: a resource-limit exception does not mean a non-match.
+
+Pooled buffers containing preprocessed text, joined tokens, or character lookup
+keys are cleared when returned, including on exceptional exits. This does not
+erase the caller's strings or owned cached query state.
 
 ## Not yet implemented
 

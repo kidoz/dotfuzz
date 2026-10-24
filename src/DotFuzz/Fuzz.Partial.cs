@@ -15,8 +15,13 @@ public static partial class Fuzz
     /// case-sensitive, performs no preprocessing, and operates on UTF-16 code
     /// units. An empty input returns zero. Alignment discovery uses working memory
     /// proportional to the product of the input lengths; ordinary short inputs stay
-    /// on the stack and larger inputs use pooled buffers.
+    /// on the stack and larger inputs use pooled buffers. After common affix
+    /// trimming, the alignment matrix is limited to 1,048,576 cells.
     /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The alignment matrix would exceed 1,048,576 cells after common affix trimming.
+    /// </exception>
+    /// <exception cref="OverflowException">The combined input length exceeds <see cref="int.MaxValue"/>.</exception>
     public static int PartialRatio(
         ReadOnlySpan<char> left,
         ReadOnlySpan<char> right,

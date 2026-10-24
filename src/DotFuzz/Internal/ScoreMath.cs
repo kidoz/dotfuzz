@@ -5,6 +5,10 @@ namespace DotFuzz.Internal;
 internal static class ScoreMath
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int TotalLength(int leftLength, int rightLength) =>
+        checked(leftLength + rightLength);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int RatioScore(int totalLength, int distance)
     {
         if (totalLength == 0)

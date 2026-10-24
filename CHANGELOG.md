@@ -8,6 +8,19 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Partial alignment now rejects matrices above 1,048,576 cells after common
+  affix trimming with `ArgumentOutOfRangeException`. This includes calls through
+  partial token scorers and the partial branch of `WeightedRatio`.
+
+### Fixed
+
+- Clear pooled preprocessing, token-join, and character-key buffers on return.
+- Reject overflowing combined distance lengths and token workspace sizes, check
+  edit-operation buffer sizing, and widen mask-size calculations before fallback.
+- Align documented compatibility corpus counts with committed tests.
+
 ## [1.0.0] - 2026-08-20
 
 ### Added

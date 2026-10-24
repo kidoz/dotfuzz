@@ -125,11 +125,13 @@ internal static class BitParallelLcs
                 }
             }
 
-            var maskWordCount = checked(uniqueCount * blockCount);
-            if (maskWordCount > MaximumBitMaskWords)
+            var requiredMaskWords = (long)uniqueCount * blockCount;
+            if (requiredMaskWords > MaximumBitMaskWords)
             {
                 return DynamicProgrammingDistance(pattern, text, maximumDistance);
             }
+
+            var maskWordCount = (int)requiredMaskWords;
 
             Span<ulong> characterMasks =
                 maskWordCount <= StackMaskWords
@@ -194,7 +196,7 @@ internal static class BitParallelLcs
         {
             if (rentedKeys is not null)
             {
-                ArrayPool<int>.Shared.Return(rentedKeys);
+                ArrayPool<int>.Shared.Return(rentedKeys, clearArray: true);
             }
 
             if (rentedIndices is not null)

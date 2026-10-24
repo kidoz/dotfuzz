@@ -14,6 +14,7 @@ public static partial class Fuzz
     /// Scoring is case-sensitive and operates on UTF-16 code units. An empty input
     /// returns zero to match FuzzySharp 2.x. Midpoints use ties-to-even rounding.
     /// </remarks>
+    /// <exception cref="OverflowException">The combined input length exceeds <see cref="int.MaxValue"/>.</exception>
     public static int Ratio(ReadOnlySpan<char> left, ReadOnlySpan<char> right, int scoreCutoff = 0)
     {
         if (left.IsEmpty || right.IsEmpty || scoreCutoff > 100)
@@ -21,12 +22,12 @@ public static partial class Fuzz
             return 0;
         }
 
+        var totalLength = ScoreMath.TotalLength(left.Length, right.Length);
         if (left.SequenceEqual(right))
         {
             return 100;
         }
 
-        var totalLength = checked(left.Length + right.Length);
         var maximumDistance = ScoreMath.MaximumDistanceForScore(totalLength, scoreCutoff);
         if (maximumDistance < 0)
         {

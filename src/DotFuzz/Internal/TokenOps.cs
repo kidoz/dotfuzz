@@ -10,7 +10,7 @@ internal static class TokenOps
     public const int StackTextLength = 512;
 
     /// <summary>Upper bound of the token count for a text of the given length.</summary>
-    public static int MaximumTokenCount(int textLength) => (textLength + 1) / 2;
+    public static int MaximumTokenCount(int textLength) => (textLength / 2) + (textLength & 1);
 
     /// <summary>Splits on Unicode whitespace, dropping empty tokens.</summary>
     public static int Tokenize(ReadOnlySpan<char> text, Span<int> starts, Span<int> lengths)

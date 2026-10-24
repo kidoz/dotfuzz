@@ -37,6 +37,13 @@ cutoffs behave as 0; cutoffs greater than 100 return 0. A returned 0 can mean an
 actual zero score or a rejected score. A cutoff is not a different scoring scale.
 `WeightedRatio` applies its public cutoff after combining sub-scores.
 
+Partial alignment is limited to 1,048,576 matrix cells after common affix trimming;
+larger requests throw `ArgumentOutOfRangeException`. This also applies to partial
+token scorers and the partial branch of `WeightedRatio`, for each pair they score.
+See [Resource limits](compatibility.md#resource-limits) for the size formula and
+examples. Combined scoring lengths and token workspace sizes use checked
+arithmetic; unrepresentable sizes throw `OverflowException`.
+
 ## Indel distance
 
 Namespace: `DotFuzz.Distance`. Type: `public static class Indel`.
@@ -56,6 +63,9 @@ edit operations. The result is exact within that limit; otherwise it is
 `scoreCutoff + 1`. The default requests the exact distance. A negative cutoff
 throws `ArgumentOutOfRangeException`; null string arguments throw
 `ArgumentNullException`.
+
+Combined input lengths greater than `int.MaxValue` throw `OverflowException`
+before distance calculation, including when a distance cutoff is provided.
 
 ## Preprocessing
 

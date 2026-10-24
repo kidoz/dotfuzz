@@ -35,6 +35,9 @@ public static partial class Fuzz
     /// scores the sorted token joins with best-partial alignment.
     /// </summary>
     /// <inheritdoc cref="TokenSortRatio(ReadOnlySpan{char}, ReadOnlySpan{char}, int)" path="/remarks"/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// A sorted-join alignment would exceed PartialRatio's 1,048,576-cell matrix limit.
+    /// </exception>
     public static int PartialTokenSortRatio(
         ReadOnlySpan<char> left,
         ReadOnlySpan<char> right,
@@ -75,6 +78,9 @@ public static partial class Fuzz
     /// scores the token-set combinations with best-partial alignment.
     /// </summary>
     /// <inheritdoc cref="TokenSortRatio(ReadOnlySpan{char}, ReadOnlySpan{char}, int)" path="/remarks"/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// A token-set alignment would exceed PartialRatio's 1,048,576-cell matrix limit.
+    /// </exception>
     public static int PartialTokenSetRatio(
         ReadOnlySpan<char> left,
         ReadOnlySpan<char> right,
@@ -108,7 +114,7 @@ public static partial class Fuzz
         {
             var leftCapacity = TokenOps.MaximumTokenCount(left.Length);
             var rightCapacity = TokenOps.MaximumTokenCount(right.Length);
-            var rangeInts = 2 * (leftCapacity + rightCapacity);
+            var rangeInts = checked(2 * (leftCapacity + rightCapacity));
             Span<int> ranges =
                 rangeInts <= 2 * TokenOps.StackTextLength
                     ? stackalloc int[2 * TokenOps.StackTextLength]
@@ -152,12 +158,12 @@ public static partial class Fuzz
 
             if (rentedLeftBuffer is not null)
             {
-                ArrayPool<char>.Shared.Return(rentedLeftBuffer);
+                ArrayPool<char>.Shared.Return(rentedLeftBuffer, clearArray: true);
             }
 
             if (rentedRightBuffer is not null)
             {
-                ArrayPool<char>.Shared.Return(rentedRightBuffer);
+                ArrayPool<char>.Shared.Return(rentedRightBuffer, clearArray: true);
             }
         }
     }
@@ -182,12 +188,13 @@ public static partial class Fuzz
             var rightCapacity = TokenOps.MaximumTokenCount(right.Length);
 
             // Ranges for both sides plus the intersection/remainder index lists.
-            var rangeInts = 2 * (leftCapacity + rightCapacity);
-            var listInts = 2 * (leftCapacity + rightCapacity);
+            var rangeInts = checked(2 * (leftCapacity + rightCapacity));
+            var listInts = rangeInts;
+            var intCount = checked(rangeInts + listInts);
             Span<int> ints =
-                rangeInts + listInts <= 4 * TokenOps.StackTextLength
+                intCount <= 4 * TokenOps.StackTextLength
                     ? stackalloc int[4 * TokenOps.StackTextLength]
-                    : (rentedInts = ArrayPool<int>.Shared.Rent(rangeInts + listInts)).AsSpan();
+                    : (rentedInts = ArrayPool<int>.Shared.Rent(intCount)).AsSpan();
 
             var leftStarts = ints[..leftCapacity];
             var leftLengths = ints.Slice(leftCapacity, leftCapacity);
@@ -230,7 +237,7 @@ public static partial class Fuzz
 
             // sect | sect + leftOnly | sect + rightOnly, all single-space joins.
             var sectCapacity = Math.Min(left.Length, right.Length);
-            var charCount = sectCapacity + left.Length + right.Length;
+            var charCount = checked(sectCapacity + left.Length + right.Length);
             Span<char> chars =
                 charCount <= 3 * TokenOps.StackTextLength
                     ? stackalloc char[3 * TokenOps.StackTextLength]
@@ -311,7 +318,7 @@ public static partial class Fuzz
 
             if (rentedChars is not null)
             {
-                ArrayPool<char>.Shared.Return(rentedChars);
+                ArrayPool<char>.Shared.Return(rentedChars, clearArray: true);
             }
         }
     }

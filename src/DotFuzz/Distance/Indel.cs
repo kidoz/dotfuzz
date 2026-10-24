@@ -1,3 +1,5 @@
+using DotFuzz.Internal;
+
 namespace DotFuzz.Distance;
 
 /// <summary>
@@ -10,6 +12,7 @@ public static class Indel
     /// Returns the Indel distance, or <paramref name="scoreCutoff"/> + 1 when the
     /// exact distance is known to exceed the cutoff.
     /// </summary>
+    /// <exception cref="OverflowException">The combined input length exceeds <see cref="int.MaxValue"/>.</exception>
     public static int Distance(
         ReadOnlySpan<char> left,
         ReadOnlySpan<char> right,
@@ -17,6 +20,7 @@ public static class Indel
     )
     {
         ArgumentOutOfRangeException.ThrowIfNegative(scoreCutoff);
+        _ = ScoreMath.TotalLength(left.Length, right.Length);
 
         if (left.SequenceEqual(right))
         {

@@ -26,5 +26,19 @@ return
     && result is { Found: true, Value: "alpha" }
     && top.Length == 2
     && all.Length == 3
+    && RejectsOversizedPartialAlignment()
     ? 0
     : 1;
+
+static bool RejectsOversizedPartialAlignment()
+{
+    try
+    {
+        _ = Fuzz.PartialRatio(new string('a', 1_024), new string('b', 1_024));
+        return false;
+    }
+    catch (ArgumentOutOfRangeException)
+    {
+        return true;
+    }
+}

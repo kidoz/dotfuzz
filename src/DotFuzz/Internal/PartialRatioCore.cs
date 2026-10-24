@@ -12,6 +12,7 @@ internal static class PartialRatioCore
 {
     private const int StackMatrixCells = 4_096;
     private const int StackEditOps = 512;
+    private const int MaximumMatrixCells = 1_048_576;
 
     private const int Insert = 0;
     private const int Delete = 1;
@@ -19,6 +20,8 @@ internal static class PartialRatioCore
 
     public static int Score(ReadOnlySpan<char> left, ReadOnlySpan<char> right, int scoreCutoff)
     {
+        _ = ScoreMath.TotalLength(left.Length, right.Length);
+
         ReadOnlySpan<char> shorter;
         ReadOnlySpan<char> longer;
         if (left.Length < right.Length)
@@ -53,9 +56,18 @@ internal static class PartialRatioCore
         middleShorter = middleShorter[..^suffixLength];
         middleLonger = middleLonger[..^suffixLength];
 
-        var rows = middleShorter.Length + 1;
+        // Widen before adding or multiplying, and reject before renting workspace.
+        var cellCount = ((long)middleShorter.Length + 1) * ((long)middleLonger.Length + 1);
+        if (cellCount > MaximumMatrixCells)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(right),
+                "Partial alignment requires more than 1,048,576 matrix cells after common affix trimming."
+            );
+        }
+
         var columns = middleLonger.Length + 1;
-        var cells = checked(rows * columns);
+        var cells = (int)cellCount;
 
         int[]? rentedMatrix = null;
         int[]? rentedOps = null;
@@ -70,10 +82,11 @@ internal static class PartialRatioCore
             FillCostMatrix(middleShorter, middleLonger, matrix, columns);
 
             var operationCount = matrix[cells - 1];
+            var operationBufferLength = EditOperationBufferLength(operationCount);
             Span<int> ops =
                 operationCount <= StackEditOps
                     ? stackalloc int[3 * StackEditOps]
-                    : (rentedOps = ArrayPool<int>.Shared.Rent(3 * operationCount)).AsSpan();
+                    : (rentedOps = ArrayPool<int>.Shared.Rent(operationBufferLength)).AsSpan();
             var opTypes = ops[..operationCount];
             var opSources = ops.Slice(operationCount, operationCount);
             var opDestinations = ops.Slice(2 * operationCount, operationCount);
@@ -111,6 +124,9 @@ internal static class PartialRatioCore
             }
         }
     }
+
+    internal static int EditOperationBufferLength(int operationCount) =>
+        checked((int)(3L * operationCount));
 
     private static void FillCostMatrix(
         ReadOnlySpan<char> pattern,
@@ -366,9 +382,9 @@ internal static class PartialRatioCore
         }
 
         previousStart = start;
-        var end = Math.Min(start + shorter.Length, longer.Length);
+        var end = start + Math.Min(shorter.Length, longer.Length - start);
         var window = longer[start..end];
-        var totalLength = shorter.Length + window.Length;
+        var totalLength = ScoreMath.TotalLength(shorter.Length, window.Length);
 
         var needed = Math.Max(scoreCutoff, best + 1);
         var maximumDistance = ScoreMath.MaximumDistanceForScore(totalLength, needed);

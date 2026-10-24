@@ -16,6 +16,9 @@ public static partial class Fuzz
     /// scaling of the integer sub-scores. No preprocessing is applied; pair with
     /// <see cref="Preprocess"/> to reproduce FuzzySharp's fully processed defaults.
     /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The partial branch requires an alignment exceeding PartialRatio's 1,048,576-cell matrix limit.
+    /// </exception>
     public static int WeightedRatio(
         ReadOnlySpan<char> left,
         ReadOnlySpan<char> right,
