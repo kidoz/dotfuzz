@@ -7,9 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  attestations: write
   contents: read
-  id-token: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -21,23 +19,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
-    permissions:
-      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: Validate release tag and changelog
+        id: version
         shell: bash
         run: |
           set -euo pipefail
           if [ "${GITHUB_EVENT_NAME}" != "release" ]; then
             echo "Manual dispatch: skipping tag validation; packages are versioned 0.0.0-manual and never published."
+            echo "version=0.0.0-manual" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
           tag="${GITHUB_REF_NAME}"
-          if [[ ! "${tag}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+          export LC_ALL=C
+          number='(0|[1-9][0-9]*)'
+          identifier="(${number}|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)"
+          release_tag="^v${number}[.]${number}[.]${number}(-${identifier}([.]${identifier})*)?$"
+          if [[ ! "${tag}" =~ ${release_tag} ]]; then
             echo "::error::Release tag '${tag}' is not strict semver. Expected vMAJOR.MINOR.PATCH with an optional -prerelease suffix (for example v1.0.0 or v1.1.0-rc.1)."
             exit 1
           fi
@@ -46,6 +50,7 @@ jobs:
             echo "::error::CHANGELOG.md has no '## [${version}]' section for release tag '${tag}'. Move the [Unreleased] notes to a [${version}] section before releasing."
             exit 1
           fi
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
           echo "Release tag '${tag}' is well-formed and CHANGELOG.md documents ${version}."
 
   # Gate publishing on the NativeAOT smoke matrix at the tagged commit.
@@ -55,15 +60,17 @@ jobs:
       contents: read
     uses: ./.github/workflows/aot.yml
 
-  nuget:
+  build:
     needs:
       - validate
       - aot
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: nuget
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
 
     env:
+      PACKAGE_VERSION: ${{ needs.validate.outputs.version }}
       DOTNET_NOLOGO: true
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER: 1
@@ -86,22 +93,6 @@ jobs:
       - name: Restore packages
         run: dotnet restore DotFuzz.slnx --locked-mode
 
-      - name: Resolve package version from release tag
-        id: version
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
-            version="${GITHUB_REF_NAME#v}"
-            if [ -z "${version}" ]; then
-              echo "Release tag '${GITHUB_REF_NAME}' did not yield a version." >&2
-              exit 1
-            fi
-          else
-            version="0.0.0-manual"
-          fi
-          echo "version=${version}" >> "${GITHUB_OUTPUT}"
-
       # NuGet.Config caches packages under work/.nuget, so a repo-root CSharpier
       # scan would treat restored package files as formatting inputs.
       - name: Check formatting
@@ -113,7 +104,7 @@ jobs:
       - name: Build
         run: >
           dotnet build DotFuzz.slnx --configuration Release --no-restore
-          -p:Version=${{ steps.version.outputs.version }}
+          -p:Version="${PACKAGE_VERSION}"
 
       - name: Test
         run: dotnet test DotFuzz.slnx --configuration Release --no-build --no-restore
@@ -121,30 +112,65 @@ jobs:
       - name: Pack
         run: >
           dotnet pack src/DotFuzz/DotFuzz.csproj --configuration Release --no-build
-          --output artifacts/packages -p:Version=${{ steps.version.outputs.version }}
+          --output artifacts/packages -p:Version="${PACKAGE_VERSION}"
+
+      - name: Upload package artifacts
+        id: upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: dotfuzz-release-packages
+          path: |
+            artifacts/packages/DotFuzz.${{ env.PACKAGE_VERSION }}.nupkg
+            artifacts/packages/DotFuzz.${{ env.PACKAGE_VERSION }}.snupkg
+          if-no-files-found: error
+
+  publish:
+    if: github.event_name == 'release'
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: nuget
+    permissions:
+      contents: read
+      attestations: write
+      id-token: write
+    env:
+      PACKAGE_VERSION: ${{ needs.validate.outputs.version }}
+
+    steps:
+      - name: Download packages built by this run
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          merge-multiple: true
+          path: artifacts/packages
+
+      - name: Verify package identity and version against the tag
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+          from xml.etree import ElementTree
+          from zipfile import ZipFile
+
+          version = os.environ["PACKAGE_VERSION"]
+          for extension in ("nupkg", "snupkg"):
+              path = Path("artifacts/packages") / f"DotFuzz.{version}.{extension}"
+              with ZipFile(path) as package:
+                  manifest = ElementTree.fromstring(package.read("DotFuzz.nuspec"))
+              if (manifest.findtext("{*}metadata/{*}id") != "DotFuzz"
+                      or manifest.findtext("{*}metadata/{*}version") != version):
+                  raise SystemExit(f"{path} must identify DotFuzz version {version}")
 
       - name: Attest package provenance
         uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4
         with:
           subject-path: |
-            artifacts/packages/*.nupkg
-            artifacts/packages/*.snupkg
+            artifacts/packages/DotFuzz.${{ env.PACKAGE_VERSION }}.nupkg
+            artifacts/packages/DotFuzz.${{ env.PACKAGE_VERSION }}.snupkg
 
-      - name: Upload package artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: dotfuzz-release-packages
-          path: |
-            artifacts/packages/*.nupkg
-            artifacts/packages/*.snupkg
-          if-no-files-found: error
-
-      # Trusted Publishing: exchange the GitHub OIDC token for a short-lived nuget.org API key
-      # (no long-lived NUGET_API_KEY secret). Requires id-token: write (set above) and a trusted
-      # publishing policy on nuget.org for this repo + workflow + the `nuget` environment.
       - name: NuGet login (trusted publishing)
         id: nuget-login
-        if: github.event_name == 'release'
         uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
         with:
           # The nuget.org account username (profile name), not an email address. Kept in a secret
@@ -152,19 +178,12 @@ jobs:
           user: ${{ secrets.NUGET_USER }}
 
       - name: Publish to NuGet
-        if: github.event_name == 'release'
         shell: bash
         run: |
           set -euo pipefail
-          # No --skip-duplicate: re-publishing an existing version must fail loudly rather
-          # than silently shipping nothing.
-          # Push only *.nupkg: dotnet nuget push automatically uploads the adjacent *.snupkg
-          # symbol package, so iterating *.snupkg separately re-pushes symbols and fails with
-          # a 409 conflict while the first copy is still pending validation.
-          for package in artifacts/packages/*.nupkg; do
-            dotnet nuget push "${package}" \
-              --api-key "${NUGET_API_KEY}" \
-              --source https://api.nuget.org/v3/index.json
-          done
+          # NuGet also pushes the adjacent symbol package.
+          dotnet nuget push "artifacts/packages/DotFuzz.${PACKAGE_VERSION}.nupkg" \
+            --api-key "${NUGET_API_KEY}" \
+            --source https://api.nuget.org/v3/index.json
         env:
           NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
