@@ -22,6 +22,7 @@ and this project adheres to
 - Support overlapping source and destination spans in both preprocessors.
 - Bound the number of comparisons when sorting large token lists and document
   how culture affects compatibility with FuzzySharp's token scores.
+- Keep NativeAOT publish locks separate from the portable solution restore.
 
 ## [1.0.1] - 2026-10-25
 

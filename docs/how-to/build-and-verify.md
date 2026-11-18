@@ -43,6 +43,9 @@ dotnet publish tests/DotFuzz.AotSmoke/DotFuzz.AotSmoke.csproj \
 "tests/DotFuzz.AotSmoke/bin/Release/$framework/$rid/publish/DotFuzz.AotSmoke"
 ```
 
+The library stores the runtime-specific restore lock under `obj/`. The next
+solution restore uses the tracked, portable lock file.
+
 The executable is silent on success and exits with code 0. A nonzero exit code
 means a smoke assertion failed. The project already enables `PublishAot`; a
 separate publish property is unnecessary.

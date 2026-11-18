@@ -21,6 +21,10 @@
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
+  <!-- RID-specific smoke publishes have a different dependency graph. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <NuGetLockFilePath>$(BaseIntermediateOutputPath)packages.$(RuntimeIdentifier).lock.json</NuGetLockFilePath>
+  </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="DotFuzz.Tests" />
     <None Include="../../README.md" Pack="true" PackagePath="/" />
