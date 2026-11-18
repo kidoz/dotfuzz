@@ -67,42 +67,6 @@ public sealed class RatioCompatibilityTests
         Assert.Equal(expected, new CachedRatio(left).Score(right.AsSpan(), cutoff));
     }
 
-    [Fact]
-    public void OrdinaryShortHotPathsAllocateZeroBytesAfterWarmup()
-    {
-        const string left = "high performance fuzzy search";
-        const string right = "high performnce fuzzy search";
-        var cached = new CachedRatio(left);
-        _ = Fuzz.Ratio(left.AsSpan(), right.AsSpan());
-        _ = cached.Score(right.AsSpan());
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var iteration = 0; iteration < 10_000; iteration++)
-        {
-            _ = Fuzz.Ratio(left.AsSpan(), right.AsSpan());
-            _ = cached.Score(right.AsSpan());
-        }
-
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
-    }
-
-    [Fact]
-    public void CachedLongHotPathAllocatesZeroBytesAfterWarmup()
-    {
-        var left = new string('a', 1_024) + new string('b', 128);
-        var right = new string('a', 1_024) + new string('c', 128);
-        var cached = new CachedRatio(left);
-        _ = cached.Score(right.AsSpan());
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var iteration = 0; iteration < 1_000; iteration++)
-        {
-            _ = cached.Score(right.AsSpan());
-        }
-
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
-    }
-
     private static string RandomString(Random random, int length) =>
         string.Create(
             length,

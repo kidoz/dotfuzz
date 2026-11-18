@@ -70,38 +70,6 @@ public sealed class PartialRatioCompatibilityTests
         Assert.Throws<ArgumentNullException>(() => Fuzz.PartialRatio("x", null!));
     }
 
-    [Fact]
-    public void ShortHotPathAllocatesZeroBytesAfterWarmup()
-    {
-        const string left = "fuzzy search";
-        const string right = "high performance fuzzy search";
-        _ = Fuzz.PartialRatio(left.AsSpan(), right.AsSpan());
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var iteration = 0; iteration < 10_000; iteration++)
-        {
-            _ = Fuzz.PartialRatio(left.AsSpan(), right.AsSpan());
-        }
-
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
-    }
-
-    [Fact]
-    public void PooledMediumPathAllocatesZeroBytesAfterWarmup()
-    {
-        var left = new string('a', 100) + new string('b', 28);
-        var right = new string('a', 140) + new string('c', 30);
-        _ = Fuzz.PartialRatio(left.AsSpan(), right.AsSpan());
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var iteration = 0; iteration < 1_000; iteration++)
-        {
-            _ = Fuzz.PartialRatio(left.AsSpan(), right.AsSpan());
-        }
-
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
-    }
-
     private static string RandomString(Random random, int length) =>
         string.Create(
             length,

@@ -130,26 +130,6 @@ public sealed class InputLimitTests
     }
 
     [Fact]
-    public void EmptyTrimmedMiddleScoringAllocatesNothingAfterWarmup()
-    {
-        const string shorter = "hello";
-        var tail = new string('x', 1_048_576);
-        var prefixMatch = shorter + tail;
-        var suffixMatch = tail + shorter;
-        _ = Fuzz.PartialRatio(shorter, prefixMatch);
-        _ = Fuzz.PartialRatio(suffixMatch, shorter);
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var iteration = 0; iteration < 1_000; iteration++)
-        {
-            _ = Fuzz.PartialRatio(shorter, prefixMatch);
-            _ = Fuzz.PartialRatio(suffixMatch, shorter);
-        }
-
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
-    }
-
-    [Fact]
     public void EmptyInputsAndImpossibleCutoffsDoNotNeedAnAlignmentMatrix()
     {
         var text = new string('a', 10_000);

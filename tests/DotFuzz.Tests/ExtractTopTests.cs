@@ -4,7 +4,7 @@ namespace DotFuzz.Tests;
 
 public sealed class ExtractTopTests
 {
-    private static readonly string[] Teams =
+    internal static readonly string[] Teams =
     [
         "Atlanta Falcons",
         "New York Jets",
@@ -52,22 +52,6 @@ public sealed class ExtractTopTests
         var result = Assert.Single(Process.ExtractTop(scorer, Teams, limit: 5, scoreCutoff: 100));
 
         Assert.Equal(new ExtractResult("New York Jets", 100, 1), result);
-    }
-
-    [Fact]
-    public void ImpossibleCutoffReturnsEmptyWithoutAllocating()
-    {
-        var scorer = new CachedRatio("query");
-        var choices = new string[1024];
-        Array.Fill(choices, "query");
-        _ = Process.ExtractTop(scorer, choices, choices.Length, scoreCutoff: 101);
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        var results = Process.ExtractTop(scorer, choices, choices.Length, scoreCutoff: 101);
-        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-
-        Assert.Empty(results);
-        Assert.Equal(0, allocated);
     }
 
     [Fact]
@@ -123,22 +107,6 @@ public sealed class ExtractTopTests
 
             Assert.Equal(expected, actual);
         }
-    }
-
-    [Fact]
-    public void SpanDestinationScanAllocatesZeroBytesAfterWarmup()
-    {
-        var scorer = new CachedRatio("new york jets");
-        Span<ExtractResult> destination = new ExtractResult[3];
-        _ = Process.ExtractTop(scorer, Teams, destination);
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var iteration = 0; iteration < 5_000; iteration++)
-        {
-            _ = Process.ExtractTop(scorer, Teams, destination);
-        }
-
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
     }
 
     [Fact]

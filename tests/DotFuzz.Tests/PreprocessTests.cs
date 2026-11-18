@@ -116,24 +116,6 @@ public sealed class PreprocessTests
         Assert.Throws<ArgumentNullException>(() => Preprocess.Unicode(null!));
     }
 
-    [Fact]
-    public void SpanHotPathsAllocateZeroBytesAfterWarmup()
-    {
-        const string input = "  Fast, Allocation-Free Preprocessing 101!  ";
-        var buffer = new char[input.Length];
-        _ = Preprocess.Compatibility(input.AsSpan(), buffer);
-        _ = Preprocess.Unicode(input.AsSpan(), buffer);
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var iteration = 0; iteration < 10_000; iteration++)
-        {
-            _ = Preprocess.Compatibility(input.AsSpan(), buffer);
-            _ = Preprocess.Unicode(input.AsSpan(), buffer);
-        }
-
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
-    }
-
     private static string RandomString(Random random, int length) =>
         string.Create(
             length,

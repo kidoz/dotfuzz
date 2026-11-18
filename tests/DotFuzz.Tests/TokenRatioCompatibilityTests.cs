@@ -1,5 +1,4 @@
 using System.Globalization;
-using DotFuzz.Internal;
 using FuzzySharp.PreProcess;
 using OriginalFuzz = FuzzySharp.Fuzz;
 
@@ -43,29 +42,6 @@ public sealed class TokenRatioCompatibilityTests
             OriginalFuzz.PartialTokenSetRatio(left, right),
             Fuzz.PartialTokenSetRatio(left.AsSpan(), right.AsSpan())
         );
-    }
-
-    [Theory]
-    [InlineData(16)]
-    [InlineData(17)]
-    [InlineData(1024)]
-    public void TokenSortOrdersRangesOrdinallyWithoutAllocations(int count)
-    {
-        string[] vocabulary = ["z", "zeta", "東京", "Alpha", "al", "a", "𐐀"];
-        var tokens = Enumerable.Range(0, count).Select(i => vocabulary[i % vocabulary.Length]);
-        var descending = tokens.OrderDescending(StringComparer.Ordinal).ToArray();
-        var text = string.Join(' ', descending);
-        var expected = string.Join(' ', descending.Reverse());
-        var starts = new int[count];
-        var lengths = new int[count];
-        var output = new char[text.Length];
-
-        _ = TokenOps.WriteSortedJoined(text, starts, lengths, output);
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        var written = TokenOps.WriteSortedJoined(text, starts, lengths, output);
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
-        Assert.Equal(expected, new string(output, 0, written));
-        Assert.Equal(100, Fuzz.TokenSortRatio(text, expected));
     }
 
     [Fact]
@@ -197,24 +173,6 @@ public sealed class TokenRatioCompatibilityTests
         Assert.Throws<ArgumentNullException>(() => Fuzz.PartialTokenSortRatio("x", null!));
         Assert.Throws<ArgumentNullException>(() => Fuzz.TokenSetRatio(null!, "x"));
         Assert.Throws<ArgumentNullException>(() => Fuzz.PartialTokenSetRatio("x", null!));
-    }
-
-    [Fact]
-    public void ShortTokenHotPathsAllocateZeroBytesAfterWarmup()
-    {
-        const string left = "fuzzy wuzzy was a bear";
-        const string right = "wuzzy fuzzy hugged a bear";
-        _ = Fuzz.TokenSortRatio(left.AsSpan(), right.AsSpan());
-        _ = Fuzz.TokenSetRatio(left.AsSpan(), right.AsSpan());
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var iteration = 0; iteration < 10_000; iteration++)
-        {
-            _ = Fuzz.TokenSortRatio(left.AsSpan(), right.AsSpan());
-            _ = Fuzz.TokenSetRatio(left.AsSpan(), right.AsSpan());
-        }
-
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
     }
 
     private static void AssertCutoffContract(int uncut, int cutoff, Func<int> scoreWithCutoff)

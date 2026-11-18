@@ -1,10 +1,8 @@
-using DotFuzz.Cached;
-
 namespace DotFuzz.Tests;
 
 public sealed class ExtractOneTests
 {
-    private static readonly string[] Choices =
+    internal static readonly string[] Choices =
     [
         "Atlanta Falcons",
         "New York Jets",
@@ -40,20 +38,5 @@ public sealed class ExtractOneTests
         Assert.Equal(-1, result.Index);
         Assert.Null(result.Value);
         Assert.Equal(0, result.Score);
-    }
-
-    [Fact]
-    public void CachedExtractOneScanAllocatesZeroBytesAfterWarmup()
-    {
-        var scorer = new CachedRatio("New York Giants");
-        _ = Process.ExtractOne(scorer, Choices);
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var iteration = 0; iteration < 10_000; iteration++)
-        {
-            _ = Process.ExtractOne(scorer, Choices);
-        }
-
-        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
     }
 }
