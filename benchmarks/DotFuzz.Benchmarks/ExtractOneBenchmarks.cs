@@ -50,8 +50,8 @@ public class ExtractOneBenchmarks
     [Benchmark(Baseline = true, Description = "FuzzySharp 2.0.2 Ratio loop")]
     public int FuzzySharp202Loop() => ExtractWithOriginal(_query, _choices);
 
-    [Benchmark(Description = "Raffinert 6.0.1 cached Ratio loop")]
-    public double Raffinert601CachedLoop() => ExtractWithRaffinert(_raffinertCached, _choices);
+    [Benchmark(Description = "Raffinert 6.0.2 cached Ratio loop")]
+    public double Raffinert602CachedLoop() => ExtractWithRaffinert(_raffinertCached, _choices);
 
     [Benchmark(Description = "DotFuzz cached ExtractOne")]
     public int DotFuzzCachedExtractOne() => Process.ExtractOne(_cached, _choices).Score;
