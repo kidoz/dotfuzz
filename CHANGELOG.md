@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-18
+
 ### Changed
 
 - Size stack buffers to the input in token-set scoring and partial alignment.
@@ -74,7 +76,8 @@ and this project adheres to
 - Trim- and NativeAOT-compatible, deterministic packaging with SourceLink and
   symbol packages.
 
-[Unreleased]: https://github.com/kidoz/dotfuzz/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/kidoz/dotfuzz/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/kidoz/dotfuzz/releases/tag/v1.1.0
 [1.0.2]: https://github.com/kidoz/dotfuzz/releases/tag/v1.0.2
 [1.0.1]: https://github.com/kidoz/dotfuzz/releases/tag/v1.0.1
 [1.0.0]: https://github.com/kidoz/dotfuzz/releases/tag/v1.0.0
