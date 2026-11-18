@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-18
+
 ### Added
 
 - .NET 11 support alongside .NET 10, with unit tests and NativeAOT smoke checks
@@ -65,6 +67,7 @@ and this project adheres to
 - Trim- and NativeAOT-compatible, deterministic packaging with SourceLink and
   symbol packages.
 
-[Unreleased]: https://github.com/kidoz/dotfuzz/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/kidoz/dotfuzz/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/kidoz/dotfuzz/releases/tag/v1.0.2
 [1.0.1]: https://github.com/kidoz/dotfuzz/releases/tag/v1.0.1
 [1.0.0]: https://github.com/kidoz/dotfuzz/releases/tag/v1.0.0
