@@ -13,6 +13,7 @@ and this project adheres to
 - Size stack buffers to the input in token-set scoring and partial alignment.
 - Reduce `CachedRatio` construction time and allocations by building query
   masks directly from UTF-16 code units.
+- Skip the result buffer allocation in `Process.ExtractTop` when the cutoff exceeds 100.
 
 ## [1.0.2] - 2026-11-18
 

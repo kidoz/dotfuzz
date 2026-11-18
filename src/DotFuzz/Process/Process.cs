@@ -163,7 +163,7 @@ public static class Process
         ArgumentNullException.ThrowIfNull(scorer);
         ArgumentOutOfRangeException.ThrowIfNegative(limit);
         var capacity = Math.Min(limit, choices.Length);
-        if (capacity == 0)
+        if (capacity == 0 || scoreCutoff > 100)
         {
             return [];
         }

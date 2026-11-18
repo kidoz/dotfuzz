@@ -46,6 +46,31 @@ public sealed class ExtractTopTests
     }
 
     [Fact]
+    public void CutoffOf100IncludesExactMatch()
+    {
+        var scorer = new CachedRatio("New York Jets");
+        var result = Assert.Single(Process.ExtractTop(scorer, Teams, limit: 5, scoreCutoff: 100));
+
+        Assert.Equal(new ExtractResult("New York Jets", 100, 1), result);
+    }
+
+    [Fact]
+    public void ImpossibleCutoffReturnsEmptyWithoutAllocating()
+    {
+        var scorer = new CachedRatio("query");
+        var choices = new string[1024];
+        Array.Fill(choices, "query");
+        _ = Process.ExtractTop(scorer, choices, choices.Length, scoreCutoff: 101);
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var results = Process.ExtractTop(scorer, choices, choices.Length, scoreCutoff: 101);
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+        Assert.Empty(results);
+        Assert.Equal(0, allocated);
+    }
+
+    [Fact]
     public void LimitLargerThanChoicesReturnsAllQualifying()
     {
         var results = Process.ExtractTop("new york jets", Teams, limit: 100);
@@ -59,6 +84,10 @@ public sealed class ExtractTopTests
         Assert.Empty(Process.ExtractTop("query", Teams, limit: 0));
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             Process.ExtractTop("query", Teams, limit: -1)
+        );
+        Assert.Throws<ArgumentOutOfRangeException>(
+            "limit",
+            () => Process.ExtractTop("query", Teams, limit: -1, scoreCutoff: 101)
         );
     }
 
