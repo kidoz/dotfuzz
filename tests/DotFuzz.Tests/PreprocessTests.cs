@@ -74,6 +74,26 @@ public sealed class PreprocessTests
         Assert.Equal("ab   cd", destination[..written].ToString());
     }
 
+    [Theory]
+    [InlineData(0, 1)]
+    [InlineData(1, 0)]
+    [InlineData(0, 0)]
+    public void BothPreprocessorsSupportOverlappingBuffers(int sourceStart, int destinationStart)
+    {
+        const string input = "ABC!𐐀👍Z  ";
+        var buffer = new char[input.Length + 1];
+        var source = buffer.AsSpan(sourceStart, input.Length);
+        var destination = buffer.AsSpan(destinationStart, input.Length);
+
+        input.AsSpan().CopyTo(source);
+        var written = Preprocess.Compatibility(source, destination);
+        Assert.Equal(Preprocess.Compatibility(input), destination[..written].ToString());
+
+        input.AsSpan().CopyTo(source);
+        written = Preprocess.Unicode(source, destination);
+        Assert.Equal(Preprocess.Unicode(input), destination[..written].ToString());
+    }
+
     [Fact]
     public void DestinationShorterThanSourceThrows()
     {

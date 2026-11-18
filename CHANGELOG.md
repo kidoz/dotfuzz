@@ -17,6 +17,10 @@ and this project adheres to
 
 - Build the repository with the .NET 11 SDK.
 
+### Fixed
+
+- Support overlapping source and destination spans in both preprocessors.
+
 ## [1.0.1] - 2026-10-25
 
 ### Changed

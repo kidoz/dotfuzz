@@ -20,17 +20,11 @@ public static class Preprocess
     /// Matches FuzzySharp 2.0.2's default preprocessor under ordinary cultures;
     /// DotFuzz lowercases invariantly rather than with the current culture.
     /// <paramref name="destination"/> must be at least as long as
-    /// <paramref name="source"/>. Interior space runs are preserved.
+    /// <paramref name="source"/>. The spans may overlap. Interior space runs are preserved.
     /// </remarks>
     public static int Compatibility(ReadOnlySpan<char> source, Span<char> destination)
     {
-        if (destination.Length < source.Length)
-        {
-            throw new ArgumentException(
-                "Destination must be at least as long as the source.",
-                nameof(destination)
-            );
-        }
+        source = PrepareSource(source, destination);
 
         var first = 0;
         while (first < source.Length && !IsCompatibilityToken(source[first]))
@@ -72,18 +66,12 @@ public static class Preprocess
     /// <remarks>
     /// Operates on Unicode scalar values, so astral-plane letters are preserved.
     /// Invalid surrogate sequences become spaces. <paramref name="destination"/>
-    /// must be at least as long as <paramref name="source"/>. Interior space runs
+    /// must be at least as long as <paramref name="source"/>. The spans may overlap. Interior space runs
     /// are preserved.
     /// </remarks>
     public static int Unicode(ReadOnlySpan<char> source, Span<char> destination)
     {
-        if (destination.Length < source.Length)
-        {
-            throw new ArgumentException(
-                "Destination must be at least as long as the source.",
-                nameof(destination)
-            );
-        }
+        source = PrepareSource(source, destination);
 
         var written = 0;
         var trimmedLength = 0;
@@ -108,6 +96,29 @@ public static class Preprocess
     {
         ArgumentNullException.ThrowIfNull(source);
         return Transform(source, static (input, output) => Unicode(input, output));
+    }
+
+    private static ReadOnlySpan<char> PrepareSource(
+        ReadOnlySpan<char> source,
+        Span<char> destination
+    )
+    {
+        if (destination.Length < source.Length)
+        {
+            throw new ArgumentException(
+                "Destination must be at least as long as the source.",
+                nameof(destination)
+            );
+        }
+
+        if (source.Overlaps(destination, out var offset) && offset > 0)
+        {
+            // Move the input before a forward write can overwrite unread characters.
+            source.CopyTo(destination);
+            return destination[..source.Length];
+        }
+
+        return source;
     }
 
     private static string Transform(string source, Func<string, char[], int> transformation)

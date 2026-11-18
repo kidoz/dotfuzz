@@ -92,7 +92,8 @@ String overloads return the original instance if the transformed content is
 unchanged and throw `ArgumentNullException` for null. Span overloads return the
 written length. Only `destination[..written]` is output. The destination must have
 at least `source.Length` code units, even if the eventual output is shorter;
-otherwise an `ArgumentException` is thrown.
+otherwise an `ArgumentException` is thrown. Both preprocessors support overlapping
+spans, including in-place preprocessing.
 
 ## Cached ratio
 
