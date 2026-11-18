@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Size stack buffers to the input in token-set scoring and partial alignment.
+
 ## [1.0.2] - 2026-11-18
 
 ### Added

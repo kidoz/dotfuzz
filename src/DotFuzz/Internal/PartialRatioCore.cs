@@ -92,7 +92,7 @@ internal static class PartialRatioCore
         {
             Span<int> matrix =
                 cells <= StackMatrixCells
-                    ? stackalloc int[StackMatrixCells]
+                    ? stackalloc int[cells]
                     : (rentedMatrix = ArrayPool<int>.Shared.Rent(cells)).AsSpan();
             matrix = matrix[..cells];
 
@@ -102,7 +102,7 @@ internal static class PartialRatioCore
             var operationBufferLength = EditOperationBufferLength(operationCount);
             Span<int> ops =
                 operationCount <= StackEditOps
-                    ? stackalloc int[3 * StackEditOps]
+                    ? stackalloc int[operationBufferLength]
                     : (rentedOps = ArrayPool<int>.Shared.Rent(operationBufferLength)).AsSpan();
             var opTypes = ops[..operationCount];
             var opSources = ops.Slice(operationCount, operationCount);

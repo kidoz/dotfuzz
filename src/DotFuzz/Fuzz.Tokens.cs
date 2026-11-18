@@ -192,7 +192,7 @@ public static partial class Fuzz
             var intCount = checked(rangeInts + listInts);
             Span<int> ints =
                 intCount <= 4 * TokenOps.StackTextLength
-                    ? stackalloc int[4 * TokenOps.StackTextLength]
+                    ? stackalloc int[intCount]
                     : (rentedInts = ArrayPool<int>.Shared.Rent(intCount)).AsSpan();
 
             var leftStarts = ints[..leftCapacity];
@@ -239,7 +239,7 @@ public static partial class Fuzz
             var charCount = checked(sectCapacity + left.Length + right.Length);
             Span<char> chars =
                 charCount <= 3 * TokenOps.StackTextLength
-                    ? stackalloc char[3 * TokenOps.StackTextLength]
+                    ? stackalloc char[charCount]
                     : (rentedChars = ArrayPool<char>.Shared.Rent(charCount)).AsSpan();
 
             var sectBuffer = chars[..sectCapacity];
