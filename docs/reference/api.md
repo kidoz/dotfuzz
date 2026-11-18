@@ -2,7 +2,8 @@
 
 [Documentation](../README.md) / Reference
 
-The shipping library targets `net10.0`, with no runtime package dependencies.
+The shipping library targets `net10.0` and `net11.0` and has no runtime package
+dependencies.
 All matching is case-sensitive and uses UTF-16 code units. No scorer or extraction
 method preprocesses inputs implicitly. See the [compatibility contract](compatibility.md)
 for the distance formula, rounding, and FuzzySharp differences.

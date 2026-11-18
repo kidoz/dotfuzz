@@ -1,7 +1,8 @@
 # DotFuzz documentation
 
-DotFuzz is a span-first fuzzy string matching library for .NET 10. Start with the
-tutorial to build a small matching application, or choose a page for your task.
+DotFuzz is a span-first fuzzy string matching library for .NET 10 and .NET 11.
+Follow the tutorial to build a small matching application, or choose a guide
+for your task.
 
 The documentation follows [Diátaxis](https://diataxis.fr/): tutorials guide
 learning, how-to guides solve tasks, reference describes the library, and

@@ -19,7 +19,7 @@ The core engine validates four claims that the wider scorer surface builds on:
 4. Precompiled query masks materially improve one-to-many matching without
    reflection, dynamic code, or NativeAOT-hostile features.
 
-The shipping project targets only `net10.0`, explicitly selects C# 14, enables
+The shipping project targets `net10.0` and `net11.0`, selects C# 14, enables
 nullable annotations, trim/AOT analysis, deterministic builds, and treats
 warnings as errors.
 

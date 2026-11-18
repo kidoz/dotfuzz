@@ -3,7 +3,8 @@
 [Documentation](../README.md) / How-to guides
 
 Run from the repository root using the SDK selected by
-[`global.json`](../../global.json). Restore the solution first:
+[`global.json`](../../global.json) and install the .NET 10 runtime for
+BenchmarkDotNet 0.15.8. Restore the solution first.
 
 ```sh
 dotnet restore DotFuzz.slnx --locked-mode

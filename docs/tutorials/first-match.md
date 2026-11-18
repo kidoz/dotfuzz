@@ -5,15 +5,15 @@
 In this tutorial, you will build a console application that compares two words
 and finds a team name despite a typo.
 
-You need a local DotFuzz checkout and the .NET SDK selected by its
-[`global.json`](../../global.json): version 10.0.400 with patch roll-forward.
+You need a local DotFuzz checkout and the .NET 11 SDK selected by its
+[`global.json`](../../global.json).
 Run the commands from the repository root. The application will live in a sibling
 directory named `DotFuzzDemo`.
 
 ## 1. Create the application
 
 ```sh
-dotnet new console --framework net10.0 --output ../DotFuzzDemo
+dotnet new console --framework net11.0 --output ../DotFuzzDemo
 dotnet add ../DotFuzzDemo/DotFuzzDemo.csproj reference src/DotFuzz/DotFuzz.csproj
 ```
 

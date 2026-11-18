@@ -1,11 +1,11 @@
 # DotFuzz
 
 [![Language](https://img.shields.io/badge/language-C%23-512BD4)](https://learn.microsoft.com/dotnet/csharp/)
-[![.NET SDK](https://img.shields.io/badge/.NET%20SDK-10.0.400-512BD4)](https://github.com/kidoz/dotfuzz/blob/main/global.json)
+[![.NET SDK](https://img.shields.io/badge/.NET%20SDK-11.0.100-512BD4)](https://github.com/kidoz/dotfuzz/blob/main/global.json)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/kidoz/dotfuzz/blob/main/LICENSE)
 
 **DotFuzz** — a span-first, NativeAOT-friendly fuzzy string matching engine for
-.NET 10, with FuzzySharp-compatible scoring. The current release implements:
+.NET 10 and .NET 11, with FuzzySharp-compatible scoring. The library implements:
 
 - span-first `Indel.Distance` and `Fuzz.Ratio` APIs;
 - the full direct scorer family: `PartialRatio`, `TokenSortRatio`,
@@ -65,8 +65,10 @@ a cutoff, it returns `cutoff + 1` as a sentinel when the exact result is larger.
 
 ## Requirements
 
-- [.NET SDK 10.0.400](https://dotnet.microsoft.com/download/dotnet/10.0) or
-  later (see [global.json](global.json))
+- [.NET SDK 11.0.100](https://dotnet.microsoft.com/download/dotnet/11.0) or a
+  patch in the same feature band to build from source (see [global.json](global.json))
+- [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0) to run
+  the .NET 10 tests and benchmarks
 - No runtime dependencies; the library is trim- and NativeAOT-compatible
 
 ## Build and verify
@@ -76,7 +78,7 @@ dotnet restore DotFuzz.slnx --locked-mode
 dotnet build DotFuzz.slnx -c Release --no-restore
 dotnet test DotFuzz.slnx -c Release --no-restore
 dotnet publish tests/DotFuzz.AotSmoke/DotFuzz.AotSmoke.csproj \
-  -c Release -r <your-runtime-identifier> --self-contained
+  -c Release -f net11.0 -r <your-runtime-identifier> --self-contained
 ```
 
 Formatting is enforced with [CSharpier](https://csharpier.com/), pinned as a

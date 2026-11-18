@@ -4,8 +4,9 @@
 
 Run these commands from the repository root with the SDK selected by
 [`global.json`](../../global.json). Its `latestPatch` policy selects patches in
-the 10.0.400 feature band. Package restore requires access to the configured
-NuGet source or an already populated cache.
+the 11.0.100 feature band. Install the .NET 10 runtime to run the tests on both
+frameworks. Package restore requires access to the configured NuGet source or
+an already populated cache.
 
 ## Restore, format-check, build, and test
 
@@ -31,13 +32,15 @@ as configured in `global.json`.
 
 Use a host with the native build prerequisites required by .NET NativeAOT.
 The [NativeAOT workflow](../../.github/workflows/aot.yml) runs this on Ubuntu
-and macOS. In a POSIX shell, select the installed host runtime identifier and run:
+and macOS for both frameworks. In a POSIX shell, select `net10.0` or `net11.0`
+and use the host runtime identifier.
 
 ```sh
+framework=net11.0
 rid=$(dotnet --info | awk '/RID:/ { print $2 }')
 dotnet publish tests/DotFuzz.AotSmoke/DotFuzz.AotSmoke.csproj \
-  -c Release -r "$rid" --self-contained
-"tests/DotFuzz.AotSmoke/bin/Release/net10.0/$rid/publish/DotFuzz.AotSmoke"
+  -c Release -f "$framework" -r "$rid" --self-contained
+"tests/DotFuzz.AotSmoke/bin/Release/$framework/$rid/publish/DotFuzz.AotSmoke"
 ```
 
 The executable is silent on success and exits with code 0. A nonzero exit code
