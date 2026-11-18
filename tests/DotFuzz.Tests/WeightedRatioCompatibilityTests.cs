@@ -29,8 +29,6 @@ public sealed class WeightedRatioCompatibilityTests
     [Fact]
     public void WeightedRatioMatchesFuzzySharpOnDeterministicRandomCorpus()
     {
-        // Lowercase alphanumeric tokens keep FuzzySharp's culture-sensitive token
-        // ordering identical to DotFuzz's ordinal ordering.
         var random = new Random(0xF00D);
         for (var iteration = 0; iteration < 1_000; iteration++)
         {

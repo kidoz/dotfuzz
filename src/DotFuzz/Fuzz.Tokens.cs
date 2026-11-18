@@ -11,10 +11,9 @@ public static partial class Fuzz
     /// of the joined strings. Values below <paramref name="scoreCutoff"/> return zero.
     /// </summary>
     /// <remarks>
-    /// No preprocessing is applied; pair with <see cref="Preprocess"/> to reproduce
-    /// FuzzySharp's default token matching. Token order is ordinal, which matches
-    /// FuzzySharp's culture-sensitive ordering for preprocessed lowercase
-    /// alphanumeric input. An input with no tokens scores zero.
+    /// Preprocessing is explicit. Token order is ordinal. FuzzySharp orders tokens
+    /// using the current culture, which can change scores even after preprocessing.
+    /// An input with no tokens scores zero.
     /// </remarks>
     public static int TokenSortRatio(
         ReadOnlySpan<char> left,

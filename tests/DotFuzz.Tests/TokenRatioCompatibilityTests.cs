@@ -1,3 +1,5 @@
+using System.Globalization;
+using DotFuzz.Internal;
 using FuzzySharp.PreProcess;
 using OriginalFuzz = FuzzySharp.Fuzz;
 
@@ -43,11 +45,53 @@ public sealed class TokenRatioCompatibilityTests
         );
     }
 
+    [Theory]
+    [InlineData(16)]
+    [InlineData(17)]
+    [InlineData(1024)]
+    public void TokenSortOrdersRangesOrdinallyWithoutAllocations(int count)
+    {
+        string[] vocabulary = ["z", "zeta", "東京", "Alpha", "al", "a", "𐐀"];
+        var tokens = Enumerable.Range(0, count).Select(i => vocabulary[i % vocabulary.Length]);
+        var descending = tokens.OrderDescending(StringComparer.Ordinal).ToArray();
+        var text = string.Join(' ', descending);
+        var expected = string.Join(' ', descending.Reverse());
+        var starts = new int[count];
+        var lengths = new int[count];
+        var output = new char[text.Length];
+
+        _ = TokenOps.WriteSortedJoined(text, starts, lengths, output);
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var written = TokenOps.WriteSortedJoined(text, starts, lengths, output);
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(expected, new string(output, 0, written));
+        Assert.Equal(100, Fuzz.TokenSortRatio(text, expected));
+    }
+
+    [Fact]
+    public void CzechCollationDiffersFromOrdinalEvenAfterPreprocessing()
+    {
+        var previousCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("cs-CZ");
+            const string left = "ch ci";
+            const string right = "ci ca";
+            Assert.Equal(60, OriginalFuzz.TokenSortRatio(left, right, PreprocessMode.Full));
+            Assert.Equal(
+                80,
+                Fuzz.TokenSortRatio(Preprocess.Compatibility(left), Preprocess.Compatibility(right))
+            );
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previousCulture;
+        }
+    }
+
     [Fact]
     public void TokenScorersMatchFuzzySharpOnDeterministicRandomCorpus()
     {
-        // Lowercase alphanumeric tokens keep FuzzySharp's culture-sensitive token
-        // ordering identical to DotFuzz's ordinal ordering.
         var random = new Random(0x70CE1);
         for (var iteration = 0; iteration < 1_500; iteration++)
         {

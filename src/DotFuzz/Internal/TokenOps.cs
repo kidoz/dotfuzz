@@ -39,7 +39,7 @@ internal static class TokenOps
         return count;
     }
 
-    /// <summary>Stable insertion sort of token ranges by ordinal comparison.</summary>
+    /// <summary>Sorts token ranges in place by ordinal comparison.</summary>
     public static void SortOrdinal(
         ReadOnlySpan<char> text,
         Span<int> starts,
@@ -47,6 +47,24 @@ internal static class TokenOps
         int count
     )
     {
+        if (count > 16)
+        {
+            // Heapsort bounds the number of token comparisons for large lists.
+            for (var root = (count / 2) - 1; root >= 0; root--)
+            {
+                SiftDown(text, starts, lengths, root, count);
+            }
+
+            for (var end = count - 1; end > 0; end--)
+            {
+                (starts[0], starts[end]) = (starts[end], starts[0]);
+                (lengths[0], lengths[end]) = (lengths[end], lengths[0]);
+                SiftDown(text, starts, lengths, 0, end);
+            }
+
+            return;
+        }
+
         for (var index = 1; index < count; index++)
         {
             var start = starts[index];
@@ -68,6 +86,45 @@ internal static class TokenOps
             starts[insert + 1] = start;
             lengths[insert + 1] = length;
         }
+    }
+
+    private static void SiftDown(
+        ReadOnlySpan<char> text,
+        Span<int> starts,
+        Span<int> lengths,
+        int root,
+        int count
+    )
+    {
+        var start = starts[root];
+        var length = lengths[root];
+        var token = text.Slice(start, length);
+        while (root < count / 2)
+        {
+            var child = (2 * root) + 1;
+            var larger = text.Slice(starts[child], lengths[child]);
+            if (child + 1 < count)
+            {
+                var sibling = text.Slice(starts[child + 1], lengths[child + 1]);
+                if (sibling.SequenceCompareTo(larger) > 0)
+                {
+                    child++;
+                    larger = sibling;
+                }
+            }
+
+            if (token.SequenceCompareTo(larger) >= 0)
+            {
+                break;
+            }
+
+            starts[root] = starts[child];
+            lengths[root] = lengths[child];
+            root = child;
+        }
+
+        starts[root] = start;
+        lengths[root] = length;
     }
 
     /// <summary>Removes adjacent duplicates from sorted token ranges.</summary>

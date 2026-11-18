@@ -111,7 +111,7 @@ The exact bound is part of the [resource contract](../reference/compatibility.md
 ## Token scorers
 
 `TokenSortRatio` and `TokenSetRatio` (and their partial variants) tokenize on
-Unicode whitespace, sort token ranges ordinally with a stable insertion sort,
+Unicode whitespace, sort token ranges ordinally in place,
 and build single-space joins in stack or pooled character buffers. The set
 variant deduplicates sorted tokens, classifies them into intersection and
 one-sided remainders with a linear merge, and takes the best of the three
@@ -172,9 +172,9 @@ the shipping library.
 - Matching is by UTF-16 code unit, not Unicode scalar value or grapheme cluster
   (`Preprocess.Unicode` is rune-aware, but scoring itself is not).
 - Scorers never preprocess implicitly; callers opt in through `Preprocess`.
-- Token ordering is ordinal, not culture-sensitive, and uses a stable insertion
-  sort: ordinary token counts are fast, but pathological many-token inputs
-  degrade quadratically.
+- Token sorting uses insertion sort for up to 16 tokens and heapsort for larger
+  lists. For `k` tokens, heapsort takes O(k log k) ordinal comparisons and
+  constant extra space. Each comparison can scan a shared token prefix.
 - There is no FuzzySharp API facade; extraction scans `ReadOnlySpan<string>`
   with direct `Ratio`, not `IEnumerable<T>` with extractor delegates.
 - `PartialRatio` alignment discovery uses working memory proportional to the

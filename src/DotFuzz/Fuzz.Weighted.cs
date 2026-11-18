@@ -14,7 +14,7 @@ public static partial class Fuzz
     /// The weights, length-ratio thresholds, and final ties-to-even rounding follow
     /// FuzzySharp's <c>WeightedRatio</c> exactly, including its double-precision
     /// scaling of the integer sub-scores. No preprocessing is applied; pair with
-    /// <see cref="Preprocess"/> to reproduce FuzzySharp's fully processed defaults.
+    /// <see cref="Preprocess"/> for full preprocessing. Token ordering remains ordinal.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">
     /// The partial branch requires an alignment exceeding PartialRatio's 1,048,576-cell matrix limit.

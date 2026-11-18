@@ -20,6 +20,8 @@ and this project adheres to
 ### Fixed
 
 - Support overlapping source and destination spans in both preprocessors.
+- Bound the number of comparisons when sorting large token lists and document
+  how culture affects compatibility with FuzzySharp's token scores.
 
 ## [1.0.1] - 2026-10-25
 

@@ -53,17 +53,17 @@ requires exact equality.
   `PartialTokenSetRatio` follow FuzzySharp's constructions (sorted joins;
   intersection and remainder combinations over unique tokens) with whitespace
   tokenization equivalent to FuzzySharp's `\s+` split.
-- DotFuzz sorts tokens ordinally; FuzzySharp uses the current culture's string
-  comparer. For FuzzySharp's own fully processed input (lowercase ASCII
-  letters, digits, spaces) the orders agree; on unprocessed culture-sensitive
-  data the sorted joins can differ.
+- DotFuzz sorts tokens ordinally. FuzzySharp uses the current culture's string
+  comparer, so token scores can differ even for preprocessed lowercase ASCII.
+  Under Czech collation (`cs-CZ`), `TokenSortRatio("ch ci", "ci ca")` scores
+  80 in DotFuzz and 60 in FuzzySharp 2.0.2 full mode.
 - `WeightedRatio` reproduces FuzzySharp's weights (0.95 unbase scale, 0.9/0.6
   partial scale), its 1.5 and 8.0 length-ratio thresholds, its use of the
   non-partial token scorers in the partial branch, and its final
   ties-to-even `Math.Round` over double-scaled integer sub-scores.
 - Like FuzzySharp's parameterless overloads, none of these scorers preprocess
-  input. FuzzySharp's `PreprocessMode.Full` is reproduced by applying
-  `Preprocess.Compatibility` to both inputs first; the preprocessor matches
+  input. To apply FuzzySharp-style full preprocessing, call
+  `Preprocess.Compatibility` on both inputs first. The preprocessor matches
   the reference regex (`[^ a-zA-Z0-9]` to space, lowercase, trim) except that
   lowercasing is culture-invariant rather than current-culture.
 
