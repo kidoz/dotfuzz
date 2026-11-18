@@ -26,6 +26,7 @@ Replace the quoted filter to measure another operation:
 |---|---|
 | `*PairwiseRatioBenchmarks*` | Direct `Ratio` comparisons |
 | `*CachedRatioBenchmarks*` | Repeated scoring with compiled queries |
+| `*CachedConstructionBenchmarks*` | Time and allocations to compile a new string query |
 | `*ExtractOneBenchmarks*` | Best-match scans across 512 choices |
 | `*CutoffRatioBenchmarks*` | Direct scoring with a score cutoff |
 

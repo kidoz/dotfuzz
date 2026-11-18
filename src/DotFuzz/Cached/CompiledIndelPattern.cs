@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Text;
 using DotFuzz.Distance;
 
 namespace DotFuzz.Cached;
@@ -6,6 +7,7 @@ namespace DotFuzz.Cached;
 internal sealed class CompiledIndelPattern
 {
     private const int MaximumBitMaskWords = 1_048_576;
+    private const int MaxLinearCountLength = 80;
     private readonly string _pattern;
     private readonly int[] _lookupKeys;
     private readonly int[] _lookupIndices;
@@ -24,26 +26,7 @@ internal sealed class CompiledIndelPattern
             return;
         }
 
-        var sorted = pattern.ToCharArray();
-        Array.Sort(sorted);
-
-        var uniqueCount = 1;
-        for (var index = 1; index < sorted.Length; index++)
-        {
-            if (sorted[index] != sorted[index - 1])
-            {
-                uniqueCount++;
-            }
-        }
-
-        var destination = 1;
-        for (var index = 1; index < sorted.Length; index++)
-        {
-            if (sorted[index] != sorted[index - 1])
-            {
-                sorted[destination++] = sorted[index];
-            }
-        }
+        var uniqueCount = CountDistinct(pattern);
 
         var blockCount = (pattern.Length + 63) >>> 6;
         var requiredMaskWords = (long)uniqueCount * blockCount;
@@ -58,18 +41,19 @@ internal sealed class CompiledIndelPattern
         _lookupKeys = new int[lookupCapacity];
         _lookupIndices = new int[lookupCapacity];
         var lookupMask = lookupCapacity - 1;
-        for (var index = 0; index < uniqueCount; index++)
-        {
-            var key = sorted[index] + 1;
-            var slot = FindSlot(_lookupKeys, lookupMask, key);
-            _lookupKeys[slot] = key;
-            _lookupIndices[slot] = index;
-        }
-
+        var nextIndex = 0;
         _characterMasks = new ulong[maskWordCount];
         for (var index = 0; index < pattern.Length; index++)
         {
-            var characterIndex = Array.BinarySearch(sorted, 0, uniqueCount, pattern[index]);
+            var key = pattern[index] + 1;
+            var slot = FindSlot(_lookupKeys, lookupMask, key);
+            if (_lookupKeys[slot] == 0)
+            {
+                _lookupKeys[slot] = key;
+                _lookupIndices[slot] = nextIndex++;
+            }
+
+            var characterIndex = _lookupIndices[slot];
             _characterMasks[(characterIndex * blockCount) + (index >>> 6)] |= 1UL << (index & 63);
         }
     }
@@ -98,6 +82,42 @@ internal sealed class CompiledIndelPattern
         // This protects pathological huge/high-cardinality inputs from quadratic
         // mask storage while retaining pooled, allocation-conscious execution.
         return DynamicProgrammingDistance(text, maximumDistance);
+    }
+
+    private static int CountDistinct(ReadOnlySpan<char> pattern)
+    {
+        var ascii = Ascii.IsValid(pattern);
+        if (!ascii && pattern.Length <= MaxLinearCountLength)
+        {
+            Span<char> distinct = stackalloc char[pattern.Length];
+            var count = 0;
+            foreach (var character in pattern)
+            {
+                if (!distinct[..count].Contains(character))
+                {
+                    distinct[count++] = character;
+                }
+            }
+
+            return count;
+        }
+
+        // One bit per possible code unit. ASCII needs only the first two words.
+        Span<ulong> seen = stackalloc ulong[ascii ? 2 : (char.MaxValue / 64) + 1];
+        seen.Clear();
+        var uniqueCount = 0;
+        foreach (var character in pattern)
+        {
+            ref var word = ref seen[character >> 6];
+            var bit = 1UL << (character & 63);
+            if ((word & bit) == 0)
+            {
+                word |= bit;
+                uniqueCount++;
+            }
+        }
+
+        return uniqueCount;
     }
 
     private static int HashCapacity(int uniqueCount)

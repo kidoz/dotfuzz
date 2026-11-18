@@ -77,9 +77,12 @@ when it is within the limit, otherwise `cutoff + 1`.
 
 ## Cached scorer
 
-`CachedRatio` owns an immutable `CompiledIndelPattern`. Construction sorts the
-query's distinct UTF-16 code units once, emits block masks, and builds a compact
-open-addressed lookup table. Patterns up to 64 code units use a specialized
+`CachedRatio` owns an immutable `CompiledIndelPattern`. Construction counts
+distinct UTF-16 code units to size the masks and hash table. ASCII queries need
+a 128-bit bitmap. For other queries the constructor uses a short list on the
+stack through 80 code units and an 8 KiB bitmap above that length. A second
+pass assigns each code unit a mask index on first encounter and fills the block
+masks directly. Patterns up to 64 code units use a specialized
 single-word scorer. Longer patterns reuse the same masks with per-call state on
 the stack or in a rented buffer.
 

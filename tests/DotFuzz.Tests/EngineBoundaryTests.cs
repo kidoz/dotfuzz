@@ -15,6 +15,36 @@ public sealed class EngineBoundaryTests
     // pairwise and the cached path.
     private const int FallbackLength = 8_400;
 
+    [Theory]
+    [InlineData(63)]
+    [InlineData(64)]
+    [InlineData(65)]
+    [InlineData(80)]
+    [InlineData(81)]
+    public void CachedMasksPreserveMixedCodeUnitsAtConstructionBoundaries(int length)
+    {
+        const string alphabet = "\uffff\0\u0080\u007f\u0040\ud800中\udfff";
+        var query = string.Create(
+            length,
+            alphabet,
+            static (chars, symbols) =>
+            {
+                for (var index = 0; index < chars.Length; index++)
+                {
+                    chars[index] = symbols[index % symbols.Length];
+                }
+            }
+        );
+        var cached = new CachedRatio(query);
+        foreach (var symbol in alphabet)
+        {
+            var candidate = new string(symbol, length);
+            var score = Fuzz.Ratio(query, candidate);
+            Assert.Equal(score, cached.Score(candidate, score));
+            Assert.Equal(0, cached.Score(candidate, score + 1));
+        }
+    }
+
     [Fact]
     public void DynamicProgrammingFallbackComputesExactDistanceAndSentinel()
     {

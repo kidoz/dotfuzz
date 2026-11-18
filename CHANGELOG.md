@@ -11,6 +11,8 @@ and this project adheres to
 ### Changed
 
 - Size stack buffers to the input in token-set scoring and partial alignment.
+- Reduce `CachedRatio` construction time and allocations by building query
+  masks directly from UTF-16 code units.
 
 ## [1.0.2] - 2026-11-18
 
