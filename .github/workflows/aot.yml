@@ -24,6 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
+        framework: [net10.0, net11.0]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
 
@@ -43,10 +44,12 @@ jobs:
 
       - name: Publish and run NativeAOT smoke
         shell: bash
+        env:
+          FRAMEWORK: ${{ matrix.framework }}
         run: |
           set -euo pipefail
           rid=$(dotnet --info | awk '/RID:/ { print $2 }')
           dotnet publish tests/DotFuzz.AotSmoke/DotFuzz.AotSmoke.csproj \
-            --configuration Release -r "$rid" --self-contained
-          "tests/DotFuzz.AotSmoke/bin/Release/net10.0/$rid/publish/DotFuzz.AotSmoke"
-          echo "NativeAOT smoke passed on $rid"
+            --configuration Release --framework "$FRAMEWORK" -r "$rid" --self-contained
+          "tests/DotFuzz.AotSmoke/bin/Release/$FRAMEWORK/$rid/publish/DotFuzz.AotSmoke"
+          echo "NativeAOT smoke passed for $FRAMEWORK on $rid"

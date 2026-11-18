@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <AssemblyName>DotFuzz</AssemblyName>
     <RootNamespace>DotFuzz</RootNamespace>
-    <Description>A span-first, NativeAOT-friendly fuzzy matching engine for .NET 10.</Description>
+    <Description>A span-first, NativeAOT-friendly fuzzy matching engine for .NET 10 and .NET 11.</Description>
     <Authors>Aleksandr Pavlov</Authors>
     <Copyright>Copyright (c) 2026 Aleksandr Pavlov</Copyright>
     <PackageProjectUrl>https://github.com/kidoz/dotfuzz</PackageProjectUrl>

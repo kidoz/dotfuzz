@@ -8,6 +8,15 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- .NET 11 support alongside .NET 10, with unit tests and NativeAOT smoke checks
+  for both target frameworks.
+
+### Changed
+
+- Build the repository with the .NET 11 SDK.
+
 ## [1.0.1] - 2026-10-25
 
 ### Changed
