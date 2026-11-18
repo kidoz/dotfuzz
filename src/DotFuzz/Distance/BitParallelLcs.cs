@@ -445,18 +445,6 @@ internal static class BitParallelLcs
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int FindSlot(Span<int> keys, int hashMask, int key)
-    {
-        var slot = (int)(((uint)key * 2_654_435_761U) & (uint)hashMask);
-        while (keys[slot] != 0 && keys[slot] != key)
-        {
-            slot = (slot + 1) & hashMask;
-        }
-
-        return slot;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int FindSlot(ReadOnlySpan<int> keys, int hashMask, int key)
     {
         var slot = (int)(((uint)key * 2_654_435_761U) & (uint)hashMask);
